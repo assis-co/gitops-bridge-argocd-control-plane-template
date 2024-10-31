@@ -1,1 +1,80 @@
 # Helm chart values
+grafana:
+  enabled: false 
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector: {} 
+    ruleSelector: {}  
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    # Avoid port conflicts by customizing pod ports
+    containers:
+      - name: prometheus
+        ports:
+          - containerPort: 9090  # Prometheus container port
+         
+## Alertmanager configuration
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+    containers:
+      - name: alertmanager
+        ports:
+          - containerPort: 9093  # Alertmanager container port
+
+kubeStateMetrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"  # Default port for kube-state-metrics
+
+nodeExporter:
+  hostPort: false  
+  ports:
+    metricsPort: 9100  
+
+pushgateway:
+  enabled: false  
+
+kubeStateMetrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+
+global:
+  scrape_interval: 15s  
+  evaluation_interval: 15s  
+
+# Disable Grafana Dashboards to avoid unnecessary configurations
+defaultRules:
+  create: true  # Create default rules
+  rules:
+    alertmanager: false
+    etcd: false
+    general: false
+    k8s: false
+    kubeApiserver: false
+    kubePrometheusNodeAlerting: false
+    kubePrometheusNodeRecording: false
+    kubeScheduler: false
+    kubernetesApps: false
+    kubernetesResources: false
+    kubernetesStorage: false
+    kubernetesSystem: false
+    node: false
+    prometheus: false
+    time: false

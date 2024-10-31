@@ -1,0 +1,57 @@
+# Loki Helm Chart values.yaml
+replicaCount: 3
+
+persistence:
+  enabled: true  # Enable persistent storage
+  storageClassName: "gp2"  # Replace with your storage class
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi  # Storage size for logs
+
+config:
+  auth_enabled: false  # Disable authentication for now; consider enabling in production
+  ingester:
+    lifecycler:
+      ring:
+        kvstore:
+          store: inmemory  # Use "inmemory" for single-node; use "memberlist" for HA
+    chunk_idle_period: 1h
+    chunk_retain_period: 30s
+  schema_config:
+    configs:
+      - from: 2022-01-01
+        store: boltdb-shipper
+        object_store: s3
+        schema: v11
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage_config:
+    boltdb_shipper:
+      active_index_directory: /data/loki/boltdb-shipper-active
+      cache_location: /data/loki/boltdb-shipper-cache
+      shared_store: s3
+  limits_config:
+    enforce_metric_name: false
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h
+  chunk_store_config:
+    max_look_back_period: 168h
+  table_manager:
+    retention_deletes_enabled: true
+    retention_period: 168h  # Retain logs for 7 days
+
+service:
+  type: ClusterIP  # Service type
+  ports:
+    http:
+      port: 3100  # Default Loki HTTP port
+
+# Limits and Requests for resources
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
