@@ -13,11 +13,6 @@ prometheus:
           resources:
             requests:
               storage: 10Gi
-    # Avoid port conflicts by customizing pod ports
-    containers:
-      - name: prometheus
-        ports:
-          - containerPort: 9090  # Prometheus container port
          
 ## Alertmanager configuration
 alertmanager:
@@ -30,10 +25,6 @@ alertmanager:
           resources:
             requests:
               storage: 2Gi
-    containers:
-      - name: alertmanager
-        ports:
-          - containerPort: 9093  # Alertmanager container port
 
 kubeStateMetrics:
   enabled: true
