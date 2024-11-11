@@ -1,0 +1,10 @@
+# https://grafana.com/docs/alloy/latest/configure/kubernetes/#method-2-create-a-separate-configmap-from-a-file
+# TLDR kubectl create configmap --namespace <NAMESPACE> alloy-config "--from-file=config.alloy=./config.alloy"
+alloy:
+# https://grafana.com/docs/alloy/latest/configure/clustering/
+  clustering:
+    enabled: true
+  configMap:
+    create: false
+    name: alloy-config
+    key: config.alloy
