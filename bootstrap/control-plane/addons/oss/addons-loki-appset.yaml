@@ -59,8 +59,8 @@ spec:
               config:
                 storage_config:
                   aws:
-                    s3: {{.metadata.annotations.loki_s3_bucket}}
-                    region: {{values.aws_region}}
+                    s3: {{metadata.annotations.loki_s3_bucket}}
+                    region: "us-east-2"
       destination:
         namespace: 'monitoring'
         name: '{{name}}'
