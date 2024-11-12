@@ -1,9 +1,9 @@
 // crash course https://grafana.com/docs/alloy/latest/get-started/components/#components
 // TLDR Grafana's attempt at their own terraform-ish syntax for config
 
-livedebugging {
-  enabled = sys.env("OBS_LIVE_DEBUGGING_ENABLED")
-}
+// livedebugging {
+//   enabled = sys.env("OBS_LIVE_DEBUGGING_ENABLED")
+// }
 
 logging {
   level = "info"
@@ -215,36 +215,36 @@ loki.process "cluster_events" {
 
 // Beyla / auto-instrumentation for apps https://grafana.com/docs/beyla/latest/
 // https://grafana.com/docs/beyla/latest/tutorial/helm-alloy/
-beyla.ebpf "collector" {
-	attributes {
-		kubernetes {
-			enable = "true"
-		}
-	}
+// beyla.ebpf "collector" {
+// 	attributes {
+// 		kubernetes {
+// 			enable = "true"
+// 		}
+// 	}
 
-	discovery {
-		services {
-      kubernetes {
-        // TODO: make this configurable via env vars / get actual namespaces
-				namespace = "modelhub"
-				deployment_name = "."
-      }
-		}
-	}
+// 	discovery {
+// 		services {
+//       kubernetes {
+//         // TODO: make this configurable via env vars / get actual namespaces
+// 				namespace = "modelhub"
+// 				deployment_name = "."
+//       }
+// 		}
+// 	}
 
-	metrics {
-		features = [
-			"application",
-		]
-	}
+// 	metrics {
+// 		features = [
+// 			"application",
+// 		]
+// 	}
 
-	output {
-		traces = [otelcol.exporter.otlp.grafana_mgmt_traces.input]
-	}
-}
+// 	output {
+// 		traces = [otelcol.exporter.otlp.grafana_mgmt_traces.input]
+// 	}
+// }
 
-prometheus.scrape "beyla" {
-	targets      = beyla.ebpf.collector.targets
-	honor_labels = true
-	forward_to   = [prometheus.remote_write.grafana_mgmt_metrics.receiver]
-}
+// prometheus.scrape "beyla" {
+// 	targets      = beyla.ebpf.collector.targets
+// 	honor_labels = true
+// 	forward_to   = [prometheus.remote_write.grafana_mgmt_metrics.receiver]
+// }
