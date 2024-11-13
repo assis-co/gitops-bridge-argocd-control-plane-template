@@ -56,11 +56,26 @@ spec:
               - $values/{{metadata.annotations.addons_repo_basepath}}environments/{{metadata.labels.environment}}/addons/{{values.addonChart}}/values.yaml
               - $values/{{metadata.annotations.addons_repo_basepath}}clusters/{{name}}/addons/{{values.addonChart}}/values.yaml
             values: |
-              config:
+              loki:
                 storage_config:
                   aws:
-                    s3: {{metadata.annotations.loki_s3_bucket}}
-                    region: "us-east-2"
+                    region: us-east-2
+                    bucketnames: {{metadata.annotations.loki_s3_bucket}}
+                    s3forcepathstyle: false
+                bucketNames:
+                    chunks: {{metadata.annotations.loki_s3_bucket}}
+                    ruler: {{metadata.annotations.loki_s3_bucket}}
+                    admin: 
+                s3:
+                  # s3 URL can be used to specify the endpoint, access key, secret key, and bucket name this works well for S3 compatible storages or if you are hosting Loki on-premises and want to use S3 as the storage backend. Either use the s3 URL or the individual fields below (AWS endpoint, region, secret).
+                  s3: s3://access_key:secret_access_key@custom_endpoint/bucket_name
+                  endpoint: https://s3.us-east-2.amazonaws.com/{{metadata.annotations.loki_s3_bucket}}
+                  region: us-east-2
+                  # AWS signature version (e.g., v2 or v4)
+                  signatureVersion: v4
+                  s3ForcePathStyle: false
+                  insecure: false
+                  http_config: {}
       destination:
         namespace: 'monitoring'
         name: '{{name}}'

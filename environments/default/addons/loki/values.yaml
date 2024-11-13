@@ -1,57 +1,62 @@
-# Loki Helm Chart values.yaml
-replicaCount: 3
-
-persistence:
-  enabled: true  # Enable persistent storage
-  storageClassName: "gp2"  # Replace with your storage class
-  accessModes:
-    - ReadWriteOnce
-  size: 20Gi  # Storage size for logs
-
-config:
-  auth_enabled: false  # Disable authentication for now; consider enabling in production
-  ingester:
-    lifecycler:
-      ring:
-        kvstore:
-          store: inmemory  # Use "inmemory" for single-node; use "memberlist" for HA
-    chunk_idle_period: 1h
-    chunk_retain_period: 30s
-  schema_config:
+loki:
+  schemaConfig:
     configs:
-      - from: 2022-01-01
-        store: boltdb-shipper
+      - from: "2024-04-01"
+        store: tsdb
         object_store: s3
-        schema: v11
+        schema: v13
         index:
           prefix: loki_index_
           period: 24h
   storage_config:
-    boltdb_shipper:
-      active_index_directory: /data/loki/boltdb-shipper-active
-      cache_location: /data/loki/boltdb-shipper-cache
-      shared_store: s3
+    aws:
+      region: <AWS region your bucket is in, for example, `eu-west-2`>
+      bucketnames: <Your AWS bucket for chunk, for example, `aws-loki-dev-chunk`>
+      s3forcepathstyle: false
+  pattern_ingester:
+      enabled: true
   limits_config:
-    enforce_metric_name: false
-    reject_old_samples: true
-    reject_old_samples_max_age: 168h
-  chunk_store_config:
-    max_look_back_period: 168h
-  table_manager:
-    retention_deletes_enabled: true
-    retention_period: 168h  # Retain logs for 7 days
+    allow_structured_metadata: true
+    volume_enabled: true
+    retention_period: 672h # 28 days retention
+  querier:
+    max_concurrent: 4
 
-service:
-  type: ClusterIP  # Service type
-  ports:
-    http:
-      port: 3100  # Default Loki HTTP port
+  storage:
+    type: s3
+    bucketNames:
+        chunks: <Your AWS bucket for chunk, for example, `aws-loki-dev-chunk`>
+        ruler: <Your AWS bucket for ruler, for example,  `aws-loki-dev-ruler`>
+        admin: <Your AWS bucket for admin, for example,  `aws-loki-dev-admin`>
+    s3:
+      # s3 URL can be used to specify the endpoint, access key, secret key, and bucket name this works well for S3 compatible storages or if you are hosting Loki on-premises and want to use S3 as the storage backend. Either use the s3 URL or the individual fields below (AWS endpoint, region, secret).
+      s3: s3://access_key:secret_access_key@custom_endpoint/bucket_name
+      # AWS endpoint URL
+      endpoint: <your-endpoint>
+      # AWS region where the S3 bucket is located
+      region: <your-region>
+      # AWS secret access key
+      secretAccessKey: <your-secret-access-key>
+      # AWS access key ID
+      accessKeyId: <your-access-key-id>
+      # AWS signature version (e.g., v2 or v4)
+      signatureVersion: <your-signature-version>
+      # Forces the path style for S3 (true/false)
+      s3ForcePathStyle: false
+      # Allows insecure (HTTP) connections (true/false)
+      insecure: false
+      # HTTP configuration settings
+      http_config: {}
 
-# Limits and Requests for resources
-resources:
-  requests:
-    cpu: 500m
-    memory: 512Mi
-  limits:
-    cpu: 1
-    memory: 1Gi
+deploymentMode: SimpleScalable
+
+backend:
+  replicas: 3
+read:
+  replicas: 3
+write:
+  replicas: 3
+
+# Disable minio storage
+minio:
+  enabled: false
